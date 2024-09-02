@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator');
+// models
+// const User = require('./users-model');
 
 const tourScehma = new mongoose.Schema(
   {
@@ -63,6 +65,42 @@ const tourScehma = new mongoose.Schema(
     createdAt: { type: Date, default: Date.now() },
     startDates: [Date],
     secretTour: { type: Boolean, default: false },
+    startLocation: {
+      // geojson
+      type: {
+        type: String,
+        default: 'Point',
+        enum: {
+          values: ['Point'],
+          message: 'Location type must be point',
+        },
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: {
+            values: ['Point'],
+            message: 'Location type must be Point',
+          },
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'user',
+      },
+    ],
   },
   { toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
@@ -74,6 +112,13 @@ tourScehma.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+// guides
+// tourScehma.pre('save', async function (next) {
+//   const guides = this.guides.map(async (id) => await User.findById(id));
+//   this.guides = await Promise.all(guides);
+//   next();
+// });
+
 // // document middleware:run after it has access to document and next
 // tourScehma.post('save', function (doc, next) {
 //   console.log(doc, 'finish doecumen');
@@ -91,6 +136,14 @@ tourScehma.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
   this.start = Date.now();
   console.log('work');
+  next();
+});
+
+tourScehma.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangeAt',
+  });
   next();
 });
 

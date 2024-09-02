@@ -34,9 +34,11 @@ app.use('/api', limiter);
 app.use(express.static(`${__dirname}/public`));
 const tourRouter = require('./routes/tour-routes');
 const userRouter = require('./routes/users-routes');
+const reviewRouter = require('./routes/review-routes');
 
 app.use('/api/tours', tourRouter);
 app.use('/api/users', userRouter);
+app.use('/api/review', reviewRouter);
 
 // handle error for route=>if person write route wrong
 app.all('*', (req, res, next) => {

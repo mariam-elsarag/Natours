@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 const Tour = require('../models/tours-model');
+
 const httpStatusText = require('../utils/httpStatusText');
 const asynWrapper = require('../middleware/asyncWrapper');
 const APIFeatures = require('../utils/apiFeatures');
@@ -27,10 +28,10 @@ exports.getTours = asynWrapper(async (req, res, next) => {
     data: { tours },
   });
 });
-exports.getTourDetails = asynWrapper(async (req, res) => {
-  const tourId = req.params.id;
+exports.getTourDetails = asynWrapper(async (req, res, next) => {
+  const { id } = req.params;
   // const tour = await Tour.findOne({__id:tourId});
-  const tour = await Tour.findById(tourId);
+  const tour = await Tour.findById(id);
   if (!tour) {
     return next(new AppError('No tour found with that ID', 404));
   }
